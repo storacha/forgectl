@@ -2,6 +2,7 @@
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
 # Binaries for programs and plugins
+forgectl
 *.exe
 *.exe~
 *.dll
@@ -28,5 +29,12 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+
+# Wallet keys
+keystore/
+
+# Config file
+config.yaml
+*.yaml
