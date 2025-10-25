@@ -71,8 +71,6 @@ type PayerTokenPair struct {
 	ID        uint      `gorm:"primarykey" json:"id"`
 	PayerID   uint      `gorm:"not null;uniqueIndex:idx_payer_token_unique" json:"payerId"`
 	TokenID   uint      `gorm:"not null;uniqueIndex:idx_payer_token_unique" json:"tokenId"`
-	Payer     Payer     `gorm:"foreignKey:PayerID" json:"payer"`
-	Token     Token     `gorm:"foreignKey:TokenID" json:"token"`
 	CreatedAt time.Time `gorm:"not null" json:"createdAt"`
 }
 
@@ -141,7 +139,6 @@ func (b BigInt) Value() (driver.Value, error) {
 type PaymentAccountSnapshot struct {
 	ID                  uint      `gorm:"primarykey" json:"id"`
 	PayerTokenPairID    uint      `gorm:"not null;index:idx_ptp_checked" json:"payerTokenPairId"`
-	PayerTokenPair      PayerTokenPair `gorm:"foreignKey:PayerTokenPairID" json:"payerTokenPair"`
 	Funds               BigInt    `gorm:"type:numeric" json:"funds"`
 	LockupCurrent       BigInt    `gorm:"type:numeric" json:"lockupCurrent"`
 	LockupRate          BigInt    `gorm:"type:numeric" json:"lockupRate"`
@@ -157,17 +154,16 @@ func (PaymentAccountSnapshot) TableName() string {
 
 // PaymentOperatorSnapshot represents a historical snapshot of payment operator information
 type PaymentOperatorSnapshot struct {
-	ID               uint           `gorm:"primarykey" json:"id"`
-	PayerTokenPairID uint           `gorm:"not null;index:idx_ptp_checked" json:"payerTokenPairId"`
-	PayerTokenPair   PayerTokenPair `gorm:"foreignKey:PayerTokenPairID" json:"payerTokenPair"`
-	IsApproved       bool           `json:"isApproved"`
-	RateAllowance    BigInt         `gorm:"type:numeric" json:"rateAllowance"`
-	LockupAllowance  BigInt         `gorm:"type:numeric" json:"lockupAllowance"`
-	RateUsage        BigInt         `gorm:"type:numeric" json:"rateUsage"`
-	LockupUsage      BigInt         `gorm:"type:numeric" json:"lockupUsage"`
-	MaxLockupPeriod  BigInt         `gorm:"type:numeric" json:"maxLockupPeriod"`
-	CreatedAt        time.Time      `gorm:"not null" json:"createdAt"`             // When this state was first observed
-	CheckedAt        time.Time      `gorm:"index:idx_ptp_checked" json:"checkedAt"` // When this state was last verified
+	ID               uint      `gorm:"primarykey" json:"id"`
+	PayerTokenPairID uint      `gorm:"not null;index:idx_ptp_checked" json:"payerTokenPairId"`
+	IsApproved       bool      `json:"isApproved"`
+	RateAllowance    BigInt    `gorm:"type:numeric" json:"rateAllowance"`
+	LockupAllowance  BigInt    `gorm:"type:numeric" json:"lockupAllowance"`
+	RateUsage        BigInt    `gorm:"type:numeric" json:"rateUsage"`
+	LockupUsage      BigInt    `gorm:"type:numeric" json:"lockupUsage"`
+	MaxLockupPeriod  BigInt    `gorm:"type:numeric" json:"maxLockupPeriod"`
+	CreatedAt        time.Time `gorm:"not null" json:"createdAt"`             // When this state was first observed
+	CheckedAt        time.Time `gorm:"index:idx_ptp_checked" json:"checkedAt"` // When this state was last verified
 }
 
 // TableName overrides the table name
@@ -177,13 +173,12 @@ func (PaymentOperatorSnapshot) TableName() string {
 
 // PaymentRailsSummary represents the summary of payment rails for a payer
 type PaymentRailsSummary struct {
-	ID               uint           `gorm:"primarykey" json:"id"`
-	PayerTokenPairID uint           `gorm:"not null;index:idx_ptp_checked" json:"payerTokenPairId"`
-	PayerTokenPair   PayerTokenPair `gorm:"foreignKey:PayerTokenPairID" json:"payerTokenPair"`
-	TotalRails       BigInt         `gorm:"type:numeric" json:"totalRails"`
-	NextOffset       BigInt         `gorm:"type:numeric" json:"nextOffset"`
-	CreatedAt        time.Time      `gorm:"not null" json:"createdAt"`             // When this state was first observed
-	CheckedAt        time.Time      `gorm:"index:idx_ptp_checked" json:"checkedAt"` // When this state was last verified
+	ID               uint      `gorm:"primarykey" json:"id"`
+	PayerTokenPairID uint      `gorm:"not null;index:idx_ptp_checked" json:"payerTokenPairId"`
+	TotalRails       BigInt    `gorm:"type:numeric" json:"totalRails"`
+	NextOffset       BigInt    `gorm:"type:numeric" json:"nextOffset"`
+	CreatedAt        time.Time `gorm:"not null" json:"createdAt"`             // When this state was first observed
+	CheckedAt        time.Time `gorm:"index:idx_ptp_checked" json:"checkedAt"` // When this state was last verified
 }
 
 // TableName overrides the table name
@@ -193,27 +188,22 @@ func (PaymentRailsSummary) TableName() string {
 
 // PaymentRailInfo represents detailed information about a payment rail
 type PaymentRailInfo struct {
-	ID                            uint           `gorm:"primarykey" json:"id"`
-	RailID                        BigInt         `gorm:"type:numeric;uniqueIndex" json:"railId"`
-	PayerTokenPairID              uint           `gorm:"not null;index:idx_ptp_checked" json:"payerTokenPairId"`
-	PayerTokenPair                PayerTokenPair `gorm:"foreignKey:PayerTokenPairID" json:"payerTokenPair"`
-	ProviderID                    uint           `gorm:"not null" json:"providerId"`
-	Provider                      Provider       `gorm:"foreignKey:ProviderID" json:"provider"`
-	OperatorContractID            uint           `gorm:"not null" json:"operatorContractId"`
-	OperatorContract              Contract       `gorm:"foreignKey:OperatorContractID" json:"operatorContract"`
-	ValidatorContractID           uint           `gorm:"not null" json:"validatorContractId"`
-	ValidatorContract             Contract       `gorm:"foreignKey:ValidatorContractID" json:"validatorContract"`
-	ServiceFeeRecipientContractID uint           `gorm:"not null" json:"serviceFeeRecipientContractId"`
-	ServiceFeeRecipientContract   Contract       `gorm:"foreignKey:ServiceFeeRecipientContractID" json:"serviceFeeRecipientContract"`
-	PaymentRate                   BigInt         `gorm:"type:numeric" json:"paymentRate"`
-	LockupPeriod                  BigInt         `gorm:"type:numeric" json:"lockupPeriod"`
-	LockupFixed                   BigInt         `gorm:"type:numeric" json:"lockupFixed"`
-	SettledUpTo                   BigInt         `gorm:"type:numeric" json:"settledUpTo"`
-	EndEpoch                      BigInt         `gorm:"type:numeric" json:"endEpoch"`
-	CommissionRateBps             BigInt         `gorm:"type:numeric" json:"commissionRateBps"`
-	IsTerminated                  bool           `json:"isTerminated"`
-	CreatedAt                     time.Time      `gorm:"not null" json:"createdAt"`             // When this state was first observed
-	CheckedAt                     time.Time      `gorm:"index:idx_rail_checked" json:"checkedAt"` // When this state was last verified
+	ID                            uint      `gorm:"primarykey" json:"id"`
+	RailID                        BigInt    `gorm:"type:numeric;uniqueIndex" json:"railId"`
+	PayerTokenPairID              uint      `gorm:"not null;index:idx_ptp_checked" json:"payerTokenPairId"`
+	ProviderID                    uint      `gorm:"not null" json:"providerId"`
+	OperatorContractID            uint      `gorm:"not null" json:"operatorContractId"`
+	ValidatorContractID           uint      `gorm:"not null" json:"validatorContractId"`
+	ServiceFeeRecipientContractID uint      `gorm:"not null" json:"serviceFeeRecipientContractId"`
+	PaymentRate                   BigInt    `gorm:"type:numeric" json:"paymentRate"`
+	LockupPeriod                  BigInt    `gorm:"type:numeric" json:"lockupPeriod"`
+	LockupFixed                   BigInt    `gorm:"type:numeric" json:"lockupFixed"`
+	SettledUpTo                   BigInt    `gorm:"type:numeric" json:"settledUpTo"`
+	EndEpoch                      BigInt    `gorm:"type:numeric" json:"endEpoch"`
+	CommissionRateBps             BigInt    `gorm:"type:numeric" json:"commissionRateBps"`
+	IsTerminated                  bool      `json:"isTerminated"`
+	CreatedAt                     time.Time `gorm:"not null" json:"createdAt"`             // When this state was first observed
+	CheckedAt                     time.Time `gorm:"index:idx_rail_checked" json:"checkedAt"` // When this state was last verified
 }
 
 // TableName overrides the table name
@@ -225,7 +215,6 @@ func (PaymentRailInfo) TableName() string {
 type ProviderSnapshot struct {
 	ID         uint      `gorm:"primarykey" json:"id"`
 	ProviderID uint      `gorm:"not null;index:idx_provider_checked" json:"providerId"`
-	Provider   Provider  `gorm:"foreignKey:ProviderID" json:"provider"`
 	IsActive   bool      `json:"isActive"`
 	IsApproved bool      `json:"isApproved"`
 	CreatedAt  time.Time `gorm:"not null" json:"createdAt"`             // When this state was first observed
