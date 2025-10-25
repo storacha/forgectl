@@ -11,7 +11,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func (s *Service) PaymentsStatus(ctx context.Context, tokenAddr, payer common.Address, offset, limit int64) (interface{}, error) {
+func (s *Service) PaymentsStatus(ctx context.Context, tokenAddr, payer common.Address, offset, limit int64) (*types.PaymentStatus, error) {
 	accountInfo, err := s.PaymentAccountInfo(ctx, tokenAddr, payer)
 	if err != nil {
 		return nil, err
