@@ -30,9 +30,9 @@ type TransactorConfig struct {
 	KeystorePassword string
 }
 
-// loadSigningKey loads a signing key from a string
+// loadSigningKeyFromString loads a signing key from a string
 // The byte slice can contain either hex-encoded or raw bytes
-func loadSigningKey(data string) (*ecdsa.PrivateKey, error) {
+func loadSigningKeyFromString(data string) (*ecdsa.PrivateKey, error) {
 	// Trim whitespace
 	keyData := strings.TrimSpace(data)
 
@@ -88,7 +88,7 @@ func NewTransactor(chainID *big.Int, cfg TransactorConfig) (*Transactor, error) 
 	var err error
 	switch {
 	case cfg.Key != "":
-		pk, err = loadSigningKey(cfg.Key)
+		pk, err = loadSigningKeyFromString(cfg.Key)
 		if err != nil {
 			return nil, err
 		}
