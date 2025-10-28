@@ -41,7 +41,7 @@ func (Token) TableName() string {
 type Provider struct {
 	ID          uint      `gorm:"primarykey" json:"id"`
 	Address     string    `gorm:"type:varchar(42);uniqueIndex" json:"address"`
-	ProviderID  BigInt    `gorm:"type:numeric;uniqueIndex" json:"providerId"`
+	ProviderID  BigInt    `gorm:"type:numeric;index" json:"providerId"` // Changed from uniqueIndex to regular index
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Payee       string    `gorm:"type:varchar(42)" json:"payee"`
@@ -92,7 +92,7 @@ type BigInt struct {
 // NewBigInt creates a new BigInt from a big.Int pointer
 func NewBigInt(i *big.Int) BigInt {
 	if i == nil {
-		return BigInt{big.NewInt(0)}
+		return BigInt{nil} // Return nil to represent NULL in database
 	}
 	return BigInt{i}
 }
@@ -100,7 +100,7 @@ func NewBigInt(i *big.Int) BigInt {
 // Scan implements sql.Scanner for reading from database
 func (b *BigInt) Scan(value interface{}) error {
 	if value == nil {
-		b.Int = big.NewInt(0)
+		b.Int = nil // Keep as nil to represent NULL
 		return nil
 	}
 
@@ -126,7 +126,7 @@ func (b *BigInt) Scan(value interface{}) error {
 // Value implements driver.Valuer for writing to database
 func (b BigInt) Value() (driver.Value, error) {
 	if b.Int == nil {
-		return "0", nil
+		return nil, nil // Return nil to represent NULL in database
 	}
 	return b.Int.String(), nil
 }

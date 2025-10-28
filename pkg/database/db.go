@@ -162,15 +162,31 @@ func (db *DB) GetOrCreateToken(address string) (uint, error) {
 // GetOrCreateProvider uses UPSERT pattern to efficiently lookup/create provider
 func (db *DB) GetOrCreateProvider(address string, providerID *big.Int, name, description, payee string) (uint, error) {
 	var provider Provider
+
+	// Build the attributes for creation
+	attrs := Provider{
+		Address:     address,
+		Name:        name,
+		Description: description,
+		Payee:       payee,
+	}
+
+	// Only set ProviderID if it's not nil to avoid unique constraint violations
+	// Multiple providers can't have NULL provider_id due to unique index
+	if providerID != nil {
+		attrs.ProviderID = NewBigInt(providerID)
+	}
+
 	err := db.Where(Provider{Address: address}).
-		Attrs(Provider{
-			Address:     address,
-			ProviderID:  NewBigInt(providerID),
-			Name:        name,
-			Description: description,
-			Payee:       payee,
-		}).
+		Attrs(attrs).
 		FirstOrCreate(&provider).Error
+
+	// If the provider already exists but we have a new providerID, update it
+	if err == nil && providerID != nil && provider.ProviderID.Int == nil {
+		provider.ProviderID = NewBigInt(providerID)
+		err = db.Save(&provider).Error
+	}
+
 	return provider.ID, err
 }
 
