@@ -40,6 +40,9 @@ type Config struct {
 
 	KeystorePath     string `mapstructure:"keystore_path"`
 	KeystorePassword string `mapstructure:"keystore_password"`
+
+	// Database configuration
+	DatabaseURL string `mapstructure:"database_url"`
 }
 
 // Validate checks that all required configuration fields are set and valid
@@ -94,6 +97,9 @@ func (c *Config) Validate() error {
 	if c.KeystorePassword == "" {
 		return fmt.Errorf("keystore_password is required")
 	}
+
+	// Database URL is optional - only required when using monitor command
+	// Validation happens in the monitor command itself
 
 	return nil
 }
