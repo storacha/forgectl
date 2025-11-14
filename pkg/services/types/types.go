@@ -83,7 +83,9 @@ type PaymentsRailInfo struct {
 
 type ServiceContractPricing struct {
 	PricePerTiBPerMonthNoCDN   *big.Int
-	PricePerTiBPerMonthWithCDN *big.Int
+	PricePerTiBCdnEgress       *big.Int
+	PricePerTiBCacheMissEgress *big.Int
 	TokenAddress               common.Address
 	EpochsPerMonth             *big.Int
+	MinimumPricePerMonth       *big.Int
 }
