@@ -9,7 +9,7 @@ require (
 	github.com/ipfs/go-log/v2 v2.8.2
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.21.0
-	github.com/storacha/filecoin-services/go v0.0.1
+	github.com/storacha/filecoin-services/go v0.0.2
 	golang.org/x/sync v0.16.0
 )
 

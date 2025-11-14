@@ -21,9 +21,11 @@ func (s *Service) QueryServicePrice(ctx context.Context) (*types.ServiceContract
 
 	return &types.ServiceContractPricing{
 		PricePerTiBPerMonthNoCDN:   pricing.PricePerTiBPerMonthNoCDN,
-		PricePerTiBPerMonthWithCDN: pricing.PricePerTiBPerMonthWithCDN,
+		PricePerTiBCdnEgress:       pricing.PricePerTiBCdnEgress,
+		PricePerTiBCacheMissEgress: pricing.PricePerTiBCacheMissEgress,
 		TokenAddress:               pricing.TokenAddress,
 		EpochsPerMonth:             pricing.EpochsPerMonth,
+		MinimumPricePerMonth:       pricing.MinimumPricePerMonth,
 	}, nil
 }
 
