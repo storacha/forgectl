@@ -30,8 +30,12 @@ func init() {
 	rootCmd.PersistentFlags().String("service-registry-contract-address", "", "ServiceProviderRegistry contract address (required)")
 	rootCmd.PersistentFlags().String("payments-contract-address", "", "Payments contract address (required)")
 	rootCmd.PersistentFlags().String("token-contract-address", "", "USDFC token contract address (required)")
+	rootCmd.PersistentFlags().String("session-key-registry-contract-address", "", "SessionKeyRegistry contract address (required)")
+
 	rootCmd.PersistentFlags().String("keystore-path", "", "path to keystore")
 	rootCmd.PersistentFlags().String("keystore-password", "", "password to decrypt keystore")
+	rootCmd.PersistentFlags().String("payer-keystore-path", "", "path to payer keystore")
+	rootCmd.PersistentFlags().String("payer-keystore-password", "", "password to decrypt payer keystore")
 
 	cobra.CheckErr(viper.BindPFlag("rpc_url", rootCmd.PersistentFlags().Lookup("rpc-url")))
 	cobra.CheckErr(viper.BindPFlag("service_contract_address", rootCmd.PersistentFlags().Lookup("service-contract-address")))
@@ -41,6 +45,8 @@ func init() {
 	cobra.CheckErr(viper.BindPFlag("token_contract_address", rootCmd.PersistentFlags().Lookup("token-contract-address")))
 	cobra.CheckErr(viper.BindPFlag("keystore_path", rootCmd.PersistentFlags().Lookup("keystore-path")))
 	cobra.CheckErr(viper.BindPFlag("keystore_password", rootCmd.PersistentFlags().Lookup("keystore-password")))
+	cobra.CheckErr(viper.BindPFlag("payer_keystore_path", rootCmd.PersistentFlags().Lookup("payer-keystore-path")))
+	cobra.CheckErr(viper.BindPFlag("payer_keystore_password", rootCmd.PersistentFlags().Lookup("payer-keystore-password")))
 
 	rootCmd.AddCommand(providers.Cmd)
 	rootCmd.AddCommand(payments.Cmd)

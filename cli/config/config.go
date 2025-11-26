@@ -32,14 +32,17 @@ type Config struct {
 	RPCUrl string `mapstructure:"rpc_url"`
 
 	// Contract addresses
-	ServiceContractAddress         string `mapstructure:"service_contract_address"`          // FilecoinWarmStorageService (Proxy)
-	VerifierContractAddress        string `mapstructure:"verifier_contract_address"`         // PDPVerifier (Proxy)
-	ServiceRegistryContractAddress string `mapstructure:"service_registry_contract_address"` // ServiceProviderRegistry (Proxy)
-	PaymentsContractAddress        string `mapstructure:"payments_contract_address"`         // Payments Contract
-	TokenContractAddress           string `mapstructure:"token_contract_address"`            // USDFC Token
+	ServiceContractAddress            string `mapstructure:"service_contract_address"`              // FilecoinWarmStorageService (Proxy)
+	VerifierContractAddress           string `mapstructure:"verifier_contract_address"`             // PDPVerifier (Proxy)
+	ServiceRegistryContractAddress    string `mapstructure:"service_registry_contract_address"`     // ServiceProviderRegistry (Proxy)
+	PaymentsContractAddress           string `mapstructure:"payments_contract_address"`             // Payments Contract
+	TokenContractAddress              string `mapstructure:"token_contract_address"`                // USDFC Token
+	SessionKeyRegistryContractAddress string `mapstructure:"session_key_registry_contract_address"` // SessionKeyRegistry (Proxy)
+	OwnerKeystorePath                 string `mapstructure:"keystore_path"`
+	OwnerKeystorePassword             string `mapstructure:"keystore_password"`
 
-	KeystorePath     string `mapstructure:"keystore_path"`
-	KeystorePassword string `mapstructure:"keystore_password"`
+	PayerKeystorePath     string `mapstructure:"payer_keystore_path"`
+	PayerKeystorePassword string `mapstructure:"payer_keystore_password"`
 }
 
 // Validate checks that all required configuration fields are set and valid
@@ -88,11 +91,26 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("invalid token_contract_address: %s", c.TokenContractAddress)
 	}
 
-	if c.KeystorePath == "" {
+	if c.SessionKeyRegistryContractAddress == "" {
+		return fmt.Errorf("session_key_registry_contract_address is required")
+	}
+
+	if !common.IsHexAddress(c.SessionKeyRegistryContractAddress) {
+		return fmt.Errorf("invalid session_key_registry_contract_address: %s", c.SessionKeyRegistryContractAddress)
+	}
+
+	if c.OwnerKeystorePath == "" {
 		return fmt.Errorf("keystore_path is required")
 	}
-	if c.KeystorePassword == "" {
+	if c.OwnerKeystorePassword == "" {
 		return fmt.Errorf("keystore_password is required")
+	}
+
+	if c.PayerKeystorePath == "" {
+		return fmt.Errorf("payer_keystore_path is required")
+	}
+	if c.PayerKeystorePassword == "" {
+		return fmt.Errorf("payer_keystore_password is required")
 	}
 
 	return nil
@@ -121,4 +139,9 @@ func (c *Config) PaymentsAddr() common.Address {
 // TokenAddr returns the token contract address as a common.Address
 func (c *Config) TokenAddr() common.Address {
 	return common.HexToAddress(c.TokenContractAddress)
+}
+
+// SessionKeyRegistryAddr returns the session key registry contract address as a common.Address
+func (c *Config) SessionKeyRegistryAddr() common.Address {
+	return common.HexToAddress(c.SessionKeyRegistryContractAddress)
 }
