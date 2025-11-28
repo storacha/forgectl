@@ -27,10 +27,12 @@ func runGet(cmd *cobra.Command, args []string) error {
 	}
 
 	inspctr, err := inspector.New(inspector.Config{
-		ClientEndpoint:          cfg.RPCUrl,
-		PaymentsContractAddress: cfg.PaymentsAddr(),
-		ServiceContractAddress:  cfg.ServiceAddr(),
-		ProviderRegistryAddress: cfg.ServiceRegistryAddr(),
+		ClientEndpoint:            cfg.RPCUrl,
+		PaymentsContractAddress:   cfg.PaymentsAddr(),
+		ServiceContractAddress:    cfg.ServiceAddr(),
+		ProviderRegistryAddress:   cfg.ServiceRegistryAddr(),
+		TokenAddress:              cfg.TokenAddr(),
+		SessionKeyRegistryAddress: cfg.SessionKeyRegistryAddr(),
 	})
 	if err != nil {
 		return err

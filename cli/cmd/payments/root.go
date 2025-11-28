@@ -12,4 +12,5 @@ var Cmd = &cobra.Command{
 func init() {
 	Cmd.AddCommand(statusCmd)
 	Cmd.AddCommand(calculateCmd)
+	Cmd.AddCommand(authorizeSessionCmd)
 }

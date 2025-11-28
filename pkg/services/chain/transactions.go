@@ -61,10 +61,10 @@ func loadPrivateKeyFromKeystore(keystorePath, password string) (*ecdsa.PrivateKe
 	}
 	defer keystoreFile.Close()
 
-	return loadPrivateKetFromReader(keystoreFile, password)
+	return loadPrivateKeyFromReader(keystoreFile, password)
 }
 
-func loadPrivateKetFromReader(reader io.Reader, password string) (*ecdsa.PrivateKey, error) {
+func loadPrivateKeyFromReader(reader io.Reader, password string) (*ecdsa.PrivateKey, error) {
 	keystoreJSON, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, fmt.Errorf("reading keystore file: %w", err)

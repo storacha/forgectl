@@ -29,14 +29,21 @@ type Service struct {
 
 	RegistryContract *bindings.ServiceProviderRegistry
 	RegistryAddr     common.Address
+
+	TokenAddr common.Address
+
+	SessionKeyRegistryContract *bindings.SessionKeyRegistry
+	SessionKeyRegistryAddr     common.Address
 }
 
 type Config struct {
 	// required
-	ClientEndpoint          string
-	PaymentsContractAddress common.Address
-	ServiceContractAddress  common.Address
-	ProviderRegistryAddress common.Address
+	ClientEndpoint            string
+	PaymentsContractAddress   common.Address
+	ServiceContractAddress    common.Address
+	ProviderRegistryAddress   common.Address
+	SessionKeyRegistryAddress common.Address
+	TokenAddress              common.Address
 
 	// optional, can derive from service contract
 	serviceContractViewAddress common.Address
@@ -82,6 +89,10 @@ func New(cfg Config, opts ...Option) (*Service, error) {
 		return nil, fmt.Errorf("creating registry contract binding: %w", err)
 	}
 
+	sessionKeyRegistryContract, err := bindings.NewSessionKeyRegistry(cfg.SessionKeyRegistryAddress, ethClient)
+	if err != nil {
+		return nil, fmt.Errorf("creating session key registry contract binding: %w", err)
+	}
 	viewAddr := cfg.serviceContractViewAddress
 	if viewAddr == (common.Address{}) {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -110,7 +121,12 @@ func New(cfg Config, opts ...Option) (*Service, error) {
 		ServiceAddr:     cfg.ServiceContractAddress,
 
 		RegistryContract: registryContract,
-		RegistryAddr:     cfg.serviceContractViewAddress,
+		RegistryAddr:     cfg.ProviderRegistryAddress,
+
+		SessionKeyRegistryContract: sessionKeyRegistryContract,
+		SessionKeyRegistryAddr:     cfg.SessionKeyRegistryAddress,
+
+		TokenAddr: cfg.TokenAddress,
 	}, nil
 }
 

@@ -42,10 +42,12 @@ func runApprove(cmd *cobra.Command, args []string) error {
 	}
 	// Create Inspector, then Operator
 	is, err := inspector.New(inspector.Config{
-		ClientEndpoint:          cfg.RPCUrl,
-		PaymentsContractAddress: cfg.PaymentsAddr(),
-		ServiceContractAddress:  cfg.ServiceAddr(),
-		ProviderRegistryAddress: cfg.ServiceRegistryAddr(),
+		ClientEndpoint:            cfg.RPCUrl,
+		PaymentsContractAddress:   cfg.PaymentsAddr(),
+		ServiceContractAddress:    cfg.ServiceAddr(),
+		ProviderRegistryAddress:   cfg.ServiceRegistryAddr(),
+		TokenAddress:              cfg.TokenAddr(),
+		SessionKeyRegistryAddress: cfg.SessionKeyRegistryAddr(),
 	})
 	if err != nil {
 		return err
@@ -57,8 +59,8 @@ func runApprove(cmd *cobra.Command, args []string) error {
 	}
 
 	txtr, err := chain.NewTransactor(chainID, chain.TransactorConfig{
-		KeystorePath:     cfg.KeystorePath,
-		KeystorePassword: cfg.KeystorePassword,
+		KeystorePath:     cfg.OwnerKeystorePath,
+		KeystorePassword: cfg.OwnerKeystorePassword,
 	})
 	if err != nil {
 		return err
