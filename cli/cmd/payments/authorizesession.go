@@ -40,7 +40,7 @@ var authorizeSessionCmd = &cobra.Command{
 func init() {
 	authorizeSessionCmd.Flags().StringVar(&address, "address", "", "session key address")
 	authorizeSessionCmd.Flags().StringVar(&duration, "duration", "24h", "duration until session key expiry (e.g., 30m, 24h, 7d)")
-	authorizeSessionCmd.Flags().StringSliceVar(&permissions, "permissions", DefaultPermissions, "list of permissions for the session key")
+	authorizeSessionCmd.Flags().StringSliceVar(&permissions, "permissions", DefaultPermissions, "list of permissions for the session key (e.g. CreateDataSet, AddPieces, etc)")
 	cobra.CheckErr(authorizeSessionCmd.MarkFlagRequired("address"))
 }
 
@@ -52,6 +52,9 @@ func runAuthorizeSession(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	if !common.IsHexAddress(address) {
+		return fmt.Errorf("invalid session key address: %s", address)
+	}
 	parsedAddr := common.HexToAddress(address)
 
 	permissionBytes := make([][32]byte, 0, len(permissions))
@@ -117,7 +120,21 @@ func CalculateExpiry(durationStr string) (*big.Int, error) {
 	return expiry, nil
 }
 
-// annoying copy of time.ParseDuration with added "d" and "w" units
+var permissionMap map[string][32]byte
+
+func init() {
+	typedData := apitypes.TypedData{
+		Types: eip712.EIP712Types,
+	}
+	permissionMap = make(map[string][32]byte, len(eip712.EIP712Types))
+	for primaryType := range eip712.EIP712Types {
+		permissionMap[primaryType] = [32]byte(typedData.TypeHash(primaryType))
+	}
+}
+
+/** FYI: everything below is an annoying copy of time.ParseDuration with added "d" and "w" units
+which are not in the standard library version **/
+
 var unitMap = map[string]int64{
 	"ns": int64(time.Nanosecond),
 	"us": int64(time.Microsecond),
@@ -290,16 +307,4 @@ func leadingFraction(s string) (x int64, scale float64, rem string) {
 		scale *= 10
 	}
 	return x, scale, s[i:]
-}
-
-var permissionMap map[string][32]byte
-
-func init() {
-	typedData := apitypes.TypedData{
-		Types: eip712.EIP712Types,
-	}
-	permissionMap = make(map[string][32]byte, len(eip712.EIP712Types))
-	for primaryType := range eip712.EIP712Types {
-		permissionMap[primaryType] = [32]byte(typedData.TypeHash(primaryType))
-	}
 }
