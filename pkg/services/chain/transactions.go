@@ -20,7 +20,8 @@ import (
 )
 
 type Transactor struct {
-	tx *bind.TransactOpts
+	tx         *bind.TransactOpts
+	privateKey *ecdsa.PrivateKey
 }
 
 type TransactorConfig struct {
@@ -105,12 +106,28 @@ func NewTransactor(chainID *big.Int, cfg TransactorConfig) (*Transactor, error) 
 	if err != nil {
 		return nil, fmt.Errorf("creating transactor: %w", err)
 	}
-	return &Transactor{tx: auth}, nil
+	return &Transactor{tx: auth, privateKey: pk}, nil
 }
 
 func (t *Transactor) Auth(ctx context.Context) *bind.TransactOpts {
 	t.tx.Context = ctx
 	return t.tx
+}
+
+// Sign signs a hash with the transactor's private key.
+// Returns the signature components (v, r, s) suitable for EIP-712 signatures.
+func (t *Transactor) Sign(hash []byte) (v uint8, r, s [32]byte, err error) {
+	sig, err := crypto.Sign(hash, t.privateKey)
+	if err != nil {
+		return 0, [32]byte{}, [32]byte{}, err
+	}
+
+	// sig is 65 bytes: 32 bytes r, 32 bytes s, 1 byte v
+	copy(r[:], sig[:32])
+	copy(s[:], sig[32:64])
+	v = sig[64] + 27 // Add 27 for EIP-155
+
+	return v, r, s, nil
 }
 
 // WaitForTransaction waits for a transaction to be mined and returns the receipt
