@@ -88,23 +88,24 @@ var (
 	// Tab styles
 	highlightColor   = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
 	inactiveTabStyle = lipgloss.NewStyle().
-		Border(tabBorderWithBottom("┴", "─", "┴"), true).
-		BorderForeground(highlightColor).
-		Padding(0, 1)
+				Border(tabBorderWithBottom("┴", "─", "┴"), true).
+				BorderForeground(highlightColor).
+				Padding(0, 1)
 	activeTabStyle = inactiveTabStyle.
-		Border(tabBorderWithBottom("┘", " ", "└"), true)
+			Border(tabBorderWithBottom("┘", " ", "└"), true)
 	windowStyle = lipgloss.NewStyle().
-		BorderForeground(highlightColor).
-		Padding(1, 2).
-		Border(lipgloss.NormalBorder()).
-		UnsetBorderTop()
+			BorderForeground(highlightColor).
+			Padding(1, 2).
+			Border(lipgloss.NormalBorder()).
+			UnsetBorderTop()
 	docStyle = lipgloss.NewStyle().Padding(1, 2, 1, 2)
 
 	// Content styles
-	titleStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("205"))
-	labelStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("245")).Width(16)
-	valueStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("255"))
-	helpStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
+	titleStyle      = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("205"))
+	labelStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("245")).Width(17)
+	payeeLabelStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("245")).Width(15)
+	valueStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("255"))
+	helpStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
 )
 
 func tabBorderWithBottom(left, middle, right string) lipgloss.Border {
@@ -270,6 +271,8 @@ func (m statusModel) View() string {
 
 	// Only render payee tabs if there are payees
 	if len(m.tabs) > 0 {
+		doc.WriteString(titleStyle.Render("PAYEES"))
+		doc.WriteString("\n")
 		// Render tabs (payees only)
 		var renderedTabs []string
 		for i, t := range m.tabs {
@@ -512,6 +515,7 @@ func (m statusModel) renderOverview() string {
 		pctVal, _ := pct.Float64()
 		b.WriteString(fmt.Sprintf(" (%.1f%%)", pctVal*100))
 	}
+	b.WriteString("\n")
 
 	return b.String()
 }
@@ -550,7 +554,7 @@ func (m statusModel) renderPayeeTab(idx int) string {
 	// Payee header
 	b.WriteString(titleStyle.Render("PAYEE"))
 	b.WriteString("\n")
-	b.WriteString(labelStyle.Render("Address:"))
+	b.WriteString(payeeLabelStyle.Render("Address:"))
 	b.WriteString(valueStyle.Render(payee.Address.Hex()))
 	b.WriteString("\n\n")
 
@@ -558,12 +562,12 @@ func (m statusModel) renderPayeeTab(idx int) string {
 	b.WriteString(titleStyle.Render("EARNINGS SUMMARY"))
 	b.WriteString("\n")
 
-	b.WriteString(labelStyle.Render("Balance:"))
+	b.WriteString(payeeLabelStyle.Render("Balance:"))
 	b.WriteString(valueStyle.Render(printer.FormatTokenAmount(payee.Account.Funds)))
 	b.WriteString(" (can withdraw now)")
 	b.WriteString("\n")
 
-	b.WriteString(labelStyle.Render("Claimable:"))
+	b.WriteString(payeeLabelStyle.Render("Claimable:"))
 	b.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color("42")).Render(
 		printer.FormatTokenAmount(totalClaimable)))
 	b.WriteString(" (proven & funded, can settle)")
@@ -578,12 +582,12 @@ func (m statusModel) renderPayeeTab(idx int) string {
 		totalNetClaimable = new(big.Int).Sub(totalClaimable, totalNetworkFee)
 	}
 
-	b.WriteString(labelStyle.Render("Network Fee:"))
+	b.WriteString(payeeLabelStyle.Render("Network Fee:"))
 	b.WriteString(valueStyle.Render(printer.FormatTokenAmount(totalNetworkFee)))
 	b.WriteString(" (0.5%)")
 	b.WriteString("\n")
 
-	b.WriteString(labelStyle.Render("Net Claimable:"))
+	b.WriteString(payeeLabelStyle.Render("Net Claimable:"))
 	b.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color("42")).Bold(true).Render(
 		printer.FormatTokenAmount(totalNetClaimable)))
 	b.WriteString(" (after fees)")
@@ -591,7 +595,7 @@ func (m statusModel) renderPayeeTab(idx int) string {
 
 	// Show forfeited amount prominently if they missed proofs
 	if totalProofFaults.Sign() > 0 {
-		b.WriteString(labelStyle.Render("Forfeited:"))
+		b.WriteString(payeeLabelStyle.Render("Forfeited:"))
 		b.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color("196")).Render(
 			printer.FormatTokenAmount(totalProofFaults)))
 		b.WriteString(" (lost to missed proofs)")
@@ -600,7 +604,7 @@ func (m statusModel) renderPayeeTab(idx int) string {
 
 	// Only show unfunded if payer is actually underfunded
 	if m.isPayerUnderfunded() && totalUnfunded.Sign() > 0 {
-		b.WriteString(labelStyle.Render("Unfunded:"))
+		b.WriteString(payeeLabelStyle.Render("Unfunded:"))
 		b.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color("214")).Render(
 			printer.FormatTokenAmount(totalUnfunded)))
 		b.WriteString(" (awaiting payer settlement)")
@@ -612,11 +616,11 @@ func (m statusModel) renderPayeeTab(idx int) string {
 	if m.pricingRates != nil {
 		b.WriteString(titleStyle.Render("CURRENT PRICING"))
 		b.WriteString("\n")
-		b.WriteString(labelStyle.Render("Storage Rate:"))
+		b.WriteString(payeeLabelStyle.Render("Storage Rate:"))
 		b.WriteString(valueStyle.Render(fmt.Sprintf("%s /TiB/month",
 			printer.FormatTokenAmount(m.pricingRates.StoragePrice))))
 		b.WriteString("\n")
-		b.WriteString(labelStyle.Render("Minimum Rate:"))
+		b.WriteString(payeeLabelStyle.Render("Minimum Rate:"))
 		b.WriteString(valueStyle.Render(printer.FormatTokenAmount(m.pricingRates.MinimumRate)))
 		b.WriteString(" /epoch")
 		b.WriteString("\n\n")
@@ -679,7 +683,7 @@ func buildPayeeTables(payees []*types.PayeeStatus) []table.Model {
 		}
 
 		columns := []table.Column{
-			{Title: "Rail", Width: 6},
+			{Title: "ID", Width: 5},
 			{Title: "DS", Width: 5},
 			{Title: "Type", Width: 5},
 			{Title: "Size", Width: 9},
