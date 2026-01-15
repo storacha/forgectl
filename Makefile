@@ -3,12 +3,12 @@
 all: build
 
 build:
-	go build -o forgectl ./cli
+	go build -o forgectl .
 
 clean:
 	rm -f forgectl
 
-install: build
+install:
 	go install
 
 test:

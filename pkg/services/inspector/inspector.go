@@ -33,6 +33,9 @@ type Service struct {
 	RegistryContract *bindings.ServiceProviderRegistry
 	RegistryAddr     common.Address
 
+	PDPVerifierContract *bindings.PDPVerifier
+	PDPVerifierAddr     common.Address
+
 	TokenAddr common.Address
 
 	SessionKeyRegistryContract *bindings.SessionKeyRegistry
@@ -47,6 +50,7 @@ type Config struct {
 	ProviderRegistryAddress   common.Address
 	SessionKeyRegistryAddress common.Address
 	TokenAddress              common.Address
+	PDPVerifierAddress        common.Address
 
 	// optional, can derive from service contract
 	serviceContractViewAddress common.Address
@@ -96,6 +100,12 @@ func New(cfg Config, opts ...Option) (*Service, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating session key registry contract binding: %w", err)
 	}
+
+	pdpVerifierContract, err := bindings.NewPDPVerifier(cfg.PDPVerifierAddress, ethClient)
+	if err != nil {
+		return nil, fmt.Errorf("creating pdp verifier contract binding: %w", err)
+	}
+
 	viewAddr := cfg.serviceContractViewAddress
 	if viewAddr == (common.Address{}) {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -125,6 +135,9 @@ func New(cfg Config, opts ...Option) (*Service, error) {
 
 		RegistryContract: registryContract,
 		RegistryAddr:     cfg.ProviderRegistryAddress,
+
+		PDPVerifierContract: pdpVerifierContract,
+		PDPVerifierAddr:     cfg.PDPVerifierAddress,
 
 		SessionKeyRegistryContract: sessionKeyRegistryContract,
 		SessionKeyRegistryAddr:     cfg.SessionKeyRegistryAddress,
