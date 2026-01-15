@@ -16,4 +16,5 @@ func init() {
 	Cmd.AddCommand(approveOperatorCmd)
 	Cmd.AddCommand(revokeOperatorCmd)
 	Cmd.AddCommand(depositCmd)
+	Cmd.AddCommand(settleRailCmd)
 }

@@ -11,6 +11,7 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
+
 	"github.com/storacha/forgectl/pkg/services/chain"
 	"github.com/storacha/forgectl/pkg/services/inspector"
 )
@@ -91,6 +92,54 @@ func (s *Service) SetOperatorApproval(ctx context.Context, params SetOperatorApp
 	}
 
 	return receipt, nil
+}
+
+type SettleRailResult struct {
+	RailId              *big.Int
+	TotalSettledAmount  *big.Int
+	TotalNetPayeeAmount *big.Int
+	OperatorCommission  *big.Int
+	NetworkFee          *big.Int
+	SettledUpTo         *big.Int
+}
+
+// SettleRail settles payments for a rail up to the specified epoch.
+// Settlement may fail to reach the target epoch if either the client lacks the funds to pay up to the current epoch
+// or the validator refuses to settle the entire requested range.
+// - railId The ID of the rail to settle.
+// - untilEpoch The epoch up to which to settle (must not exceed current block number).
+func (s *Service) SettleRail(ctx context.Context, railID *big.Int, untilEpoch *big.Int) (*SettleRailResult, error) {
+	tx, err := chain.ExecuteContractCall(func() (*ethtypes.Transaction, error) {
+		return s.PaymentsContract.SettleRail(
+			s.tx.Auth(ctx),
+			railID,
+			untilEpoch,
+		)
+	}, fmt.Sprintf("settling railID %s until epoch %s", railID, untilEpoch))
+	if err != nil {
+		return nil, err
+	}
+
+	receipt, err := chain.WaitForTransaction(ctx, s.Client(), tx)
+	if err != nil {
+		return nil, fmt.Errorf("waiting for transaction: %w", err)
+	}
+
+	for _, log := range receipt.Logs {
+		event, err := s.PaymentsContract.ParseRailSettled(*log)
+		if err == nil {
+			return &SettleRailResult{
+				RailId:              event.RailId,
+				TotalSettledAmount:  event.TotalSettledAmount,
+				TotalNetPayeeAmount: event.TotalNetPayeeAmount,
+				OperatorCommission:  event.OperatorCommission,
+				NetworkFee:          event.NetworkFee,
+				SettledUpTo:         event.SettledUpTo,
+			}, nil
+		}
+	}
+
+	return nil, fmt.Errorf("failed to parse receipt logs for rail settlement")
 }
 
 // Deposit deposits payment into the Payments contract for the payer's account.
