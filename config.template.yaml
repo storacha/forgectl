@@ -1,0 +1,18 @@
+# RPC endpoint
+rpc_url: "https://api.node.glif.io/rpc/v1"
+
+# Contracts owned by storacha
+service_contract_address: "0x" # FilecoinWarmStorageService Contract (proxy)
+
+# Contracts owned by FilOz
+service_registry_contract_address: "0x" # ServiceProviderRegistry (proxy)
+verifier_contract_address: "0x"         # PDPVerifier contract (proxy)
+payments_contract_address: "0x"         # Payments Contract
+token_contract_address: "0x"            # USDFC Token (constant)
+session_key_registry_contract_address: "0x"
+
+keystore_path: "/path/to/owner/wallet"
+keystore_password: "<password>"
+
+payer_keystore_path: "/path/to/payer/wallet"
+payer_keystore_password: "<password>"
