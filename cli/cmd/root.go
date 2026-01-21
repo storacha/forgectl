@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/storacha/forgectl/cli/cmd/metrics"
 	"github.com/storacha/forgectl/cli/cmd/payments"
 	"github.com/storacha/forgectl/cli/cmd/providers"
 )
@@ -50,6 +51,7 @@ func init() {
 
 	rootCmd.AddCommand(providers.Cmd)
 	rootCmd.AddCommand(payments.Cmd)
+	rootCmd.AddCommand(metrics.Cmd)
 }
 
 func initConfig() {

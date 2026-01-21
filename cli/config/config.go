@@ -27,6 +27,22 @@ func Load() (*Config, error) {
 	return &cfg, nil
 }
 
+// LoadReadOnly reads configuration for read-only operations (no keystore required).
+// Use this for commands that only need to query contracts, not sign transactions.
+func LoadReadOnly() (*Config, error) {
+	var cfg Config
+
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal configuration: %w", err)
+	}
+
+	if err := cfg.ValidateReadOnly(); err != nil {
+		return nil, fmt.Errorf("configuration validation failed: %w", err)
+	}
+
+	return &cfg, nil
+}
+
 type Config struct {
 	// Network configuration
 	RPCUrl string `mapstructure:"rpc_url"`
@@ -111,6 +127,61 @@ func (c *Config) Validate() error {
 	}
 	if c.PayerKeystorePassword == "" {
 		return fmt.Errorf("payer_keystore_password is required")
+	}
+
+	return nil
+}
+
+// ValidateReadOnly checks that read-only configuration fields are set and valid.
+// This is a lighter validation that doesn't require keystore paths.
+func (c *Config) ValidateReadOnly() error {
+	if c.RPCUrl == "" {
+		return fmt.Errorf("rpc_url is required")
+	}
+	if _, err := url.Parse(c.RPCUrl); err != nil {
+		return fmt.Errorf("invalid rpc_url: %w", err)
+	}
+
+	if c.ServiceContractAddress == "" {
+		return fmt.Errorf("service_contract_address is required")
+	}
+	if !common.IsHexAddress(c.ServiceContractAddress) {
+		return fmt.Errorf("invalid service_contract_address: %s", c.ServiceContractAddress)
+	}
+
+	if c.VerifierContractAddress == "" {
+		return fmt.Errorf("verifier_contract_address is required")
+	}
+	if !common.IsHexAddress(c.VerifierContractAddress) {
+		return fmt.Errorf("invalid verifier_contract_address: %s", c.VerifierContractAddress)
+	}
+
+	if c.ServiceRegistryContractAddress == "" {
+		return fmt.Errorf("service_registry_contract_address is required")
+	}
+	if !common.IsHexAddress(c.ServiceRegistryContractAddress) {
+		return fmt.Errorf("invalid service_registry_contract_address: %s", c.ServiceRegistryContractAddress)
+	}
+
+	if c.PaymentsContractAddress == "" {
+		return fmt.Errorf("payments_contract_address is required")
+	}
+	if !common.IsHexAddress(c.PaymentsContractAddress) {
+		return fmt.Errorf("invalid payments_contract_address: %s", c.PaymentsContractAddress)
+	}
+
+	if c.TokenContractAddress == "" {
+		return fmt.Errorf("token_contract_address is required")
+	}
+	if !common.IsHexAddress(c.TokenContractAddress) {
+		return fmt.Errorf("invalid token_contract_address: %s", c.TokenContractAddress)
+	}
+
+	if c.SessionKeyRegistryContractAddress == "" {
+		return fmt.Errorf("session_key_registry_contract_address is required")
+	}
+	if !common.IsHexAddress(c.SessionKeyRegistryContractAddress) {
+		return fmt.Errorf("invalid session_key_registry_contract_address: %s", c.SessionKeyRegistryContractAddress)
 	}
 
 	return nil

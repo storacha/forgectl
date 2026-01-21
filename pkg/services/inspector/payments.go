@@ -400,8 +400,9 @@ func (s *Service) PaymentsStatus(ctx context.Context, tokenAddr, payer common.Ad
 			TotalUnsettled:   totalUnsettled,
 			TotalSettleable:  totalSettleable,
 		},
-		Payees:       payees,
-		PricingRates: pricingRates,
+		Payees:           payees,
+		PricingRates:     pricingRates,
+		MaxProvingPeriod: maxProvingPeriod,
 	}, nil
 }
 
