@@ -189,6 +189,7 @@ func (s *Service) PaymentsStatus(ctx context.Context, tokenAddr, payer common.Ad
 	}
 
 	payeeAccounts := make(map[common.Address]*types.PaymentAccountInfo)
+	var muPayee sync.Mutex
 	grp2, gctx2 := errgroup.WithContext(ctx)
 	for _, addr := range payeeAddrs {
 		addr := addr
@@ -197,7 +198,9 @@ func (s *Service) PaymentsStatus(ctx context.Context, tokenAddr, payer common.Ad
 			if err != nil {
 				return fmt.Errorf("getting payee %s account info: %w", addr.Hex(), err)
 			}
+			muPayee.Lock()
 			payeeAccounts[addr] = acct
+			muPayee.Unlock()
 			return nil
 		})
 	}
