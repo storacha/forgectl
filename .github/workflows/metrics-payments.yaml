@@ -1,0 +1,33 @@
+name: Metrics - Payments (Mainnet)
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # Every 30 minutes
+  workflow_dispatch:  # Allow manual triggers
+
+jobs:
+  collect-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Build forgectl
+        run: make build
+
+      - name: Collect payment metrics
+        env:
+          FORGECTL_RPC_URL: ${{ secrets.FORGECTL_RPC_URL }}
+          FORGECTL_SERVICE_CONTRACT_ADDRESS: ${{ secrets.FORGECTL_SERVICE_CONTRACT_ADDRESS }}
+          FORGECTL_SERVICE_REGISTRY_CONTRACT_ADDRESS: ${{ secrets.FORGECTL_SERVICE_REGISTRY_CONTRACT_ADDRESS }}
+          FORGECTL_VERIFIER_CONTRACT_ADDRESS: ${{ secrets.FORGECTL_VERIFIER_CONTRACT_ADDRESS }}
+          FORGECTL_PAYMENTS_CONTRACT_ADDRESS: ${{ secrets.FORGECTL_PAYMENTS_CONTRACT_ADDRESS }}
+          FORGECTL_TOKEN_CONTRACT_ADDRESS: ${{ secrets.FORGECTL_TOKEN_CONTRACT_ADDRESS }}
+          FORGECTL_SESSION_KEY_REGISTRY_CONTRACT_ADDRESS: ${{ secrets.FORGECTL_SESSION_KEY_REGISTRY_CONTRACT_ADDRESS }}
+        run: |
+          ./forgectl metrics payments \
+            --payer ${{ secrets.PAYER_ADDRESS }} \
+            --otlp-endpoint ${{ secrets.OTLP_ENDPOINT }}
