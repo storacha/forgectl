@@ -33,11 +33,12 @@ type ApprovalResult struct {
 
 // PaymentStatus provides a comprehensive view of payment status for a payer
 type PaymentStatus struct {
-	CurrentEpoch *big.Int       `json:"currentEpoch"`
-	TokenAddress common.Address `json:"tokenAddress"`
-	Payer        *PayerStatus   `json:"payer"`
-	Payees       []*PayeeStatus `json:"payees"`
-	PricingRates *PricingRates  `json:"pricingRates,omitempty"`
+	CurrentEpoch     *big.Int       `json:"currentEpoch"`
+	TokenAddress     common.Address `json:"tokenAddress"`
+	Payer            *PayerStatus   `json:"payer"`
+	Payees           []*PayeeStatus `json:"payees"`
+	PricingRates     *PricingRates  `json:"pricingRates,omitempty"`
+	MaxProvingPeriod uint64         `json:"maxProvingPeriod"` // proving period length from contract
 }
 
 // PricingRates contains current pricing information from the service contract
