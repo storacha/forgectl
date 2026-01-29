@@ -12,11 +12,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Cache forgectl binary
+        id: cache-binary
+        uses: actions/cache@v4
+        with:
+          path: forgectl
+          key: forgectl-${{ runner.os }}-${{ hashFiles('**/*.go', 'go.sum') }}
+
+      - name: Setup Go
+        if: steps.cache-binary.outputs.cache-hit != 'true'
+        uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
 
       - name: Build forgectl
+        if: steps.cache-binary.outputs.cache-hit != 'true'
         run: make build
 
       - name: Collect payment metrics

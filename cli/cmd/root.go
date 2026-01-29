@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"errors"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -44,6 +43,7 @@ func init() {
 	cobra.CheckErr(viper.BindPFlag("service_registry_contract_address", rootCmd.PersistentFlags().Lookup("service-registry-contract-address")))
 	cobra.CheckErr(viper.BindPFlag("payments_contract_address", rootCmd.PersistentFlags().Lookup("payments-contract-address")))
 	cobra.CheckErr(viper.BindPFlag("token_contract_address", rootCmd.PersistentFlags().Lookup("token-contract-address")))
+	cobra.CheckErr(viper.BindPFlag("session_key_registry_contract_address", rootCmd.PersistentFlags().Lookup("session-key-registry-contract-address")))
 	cobra.CheckErr(viper.BindPFlag("keystore_path", rootCmd.PersistentFlags().Lookup("keystore-path")))
 	cobra.CheckErr(viper.BindPFlag("keystore_password", rootCmd.PersistentFlags().Lookup("keystore-password")))
 	cobra.CheckErr(viper.BindPFlag("payer_keystore_path", rootCmd.PersistentFlags().Lookup("payer-keystore-path")))
@@ -69,7 +69,8 @@ func initConfig() {
 
 	// Don't error if config file is not found
 	if err := viper.ReadInConfig(); err != nil {
-		if !errors.Is(err, os.ErrNotExist) {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if !errors.As(err, &configFileNotFoundError) {
 			cobra.CheckErr(err)
 		}
 	}
